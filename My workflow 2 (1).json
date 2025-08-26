@@ -148,6 +148,41 @@
     },
     {
       "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "11b931a6-ed42-4668-bf36-483d0abd1c29",
+              "name": "city",
+              "value": "={{$node[\"Split Location\"].json[\"city\"]}}",
+              "type": "string"
+            },
+            {
+              "id": "7bc9a394-f130-43b0-a44c-6b33202aa8b3",
+              "name": "name",
+              "value": "={{$node[\"Split Location\"].json[\"name\"]}}",
+              "type": "string"
+            },
+            {
+              "id": "36db596c-5501-4679-a7ef-41a916ad58ee",
+              "name": "listId",
+              "value": "={{$node[\"Split Location\"].json[\"listId\"]}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        832,
+        320
+      ],
+      "id": "dd1de193-6d92-457c-9170-f6522bbf9ff0",
+      "name": "Pass Location Info"
+    },
+    {
+      "parameters": {
         "rule": {
           "interval": [
             {
@@ -504,6 +539,17 @@
       ]
     },
     "Extract Catalog Links": {
+      "main": [
+        [
+          {
+            "node": "Pass Location Info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pass Location Info": {
       "main": [
         [
           {

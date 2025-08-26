@@ -2,15 +2,39 @@
   "name": "My workflow 2",
   "nodes": [
     {
-      "parameters": {},
-      "type": "n8n-nodes-base.manualTrigger",
-      "typeVersion": 1,
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "11b931a6-ed42-4668-bf36-483d0abd1c29",
+              "name": "city",
+              "value": "={{$node[\"Split Location1\"].json[\"city\"]}}",
+              "type": "string"
+            },
+            {
+              "id": "7bc9a394-f130-43b0-a44c-6b33202aa8b3",
+              "name": "name",
+              "value": "={{$node[\"Split Location1\"].json[\"name\"]}}",
+              "type": "string"
+            },
+            {
+              "id": "36db596c-5501-4679-a7ef-41a916ad58ee",
+              "name": "listId",
+              "value": "={{$node[\"Split Location1\"].json[\"listId\"]}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
       "position": [
-        -176,
-        0
+        3504,
+        1280
       ],
-      "id": "451461e3-158c-4661-8724-b285ea6970b7",
-      "name": "When clicking ‘Execute workflow’"
+      "id": "579451e3-6435-4daa-9b0c-fe305d4f5388",
+      "name": "Pass Location Info"
     },
     {
       "parameters": {
@@ -22,11 +46,11 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        48,
-        0
+        2384,
+        960
       ],
-      "id": "39a88bf2-b0d6-412b-9cf9-58dc4e6011d1",
-      "name": "HTTP Request",
+      "id": "1912d651-07bb-4fc3-8b13-89ef86eaf39f",
+      "name": "HTTP Request1",
       "credentials": {
         "oAuth2Api": {
           "id": "9Ul5c97KvhvrQElH",
@@ -48,11 +72,11 @@
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
       "position": [
-        -176,
-        224
+        2384,
+        1184
       ],
-      "id": "99c4e282-35e2-4ce1-8251-f06a19f559db",
-      "name": "Morning"
+      "id": "9f2f4cdf-3acf-4b33-8238-2b706c6709fc",
+      "name": "Morning1"
     },
     {
       "parameters": {
@@ -73,24 +97,24 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        48,
-        320
+        2608,
+        1280
       ],
-      "id": "f6505e91-c1df-440b-a851-c3e17c67e5b6",
-      "name": "Set Locations"
+      "id": "6ab861ca-4eee-4d6e-a479-3971a41e08ec",
+      "name": "Set Locations1"
     },
     {
       "parameters": {
-        "jsCode": "/**\n * Split Location (robust)\n * Input:  { locations: [ { name, city, resolverUrl, listId }, ... ] }\n * Output: one item per location with name, city, resolverUrl, listId\n */\n\nfunction s(v) { return (v == null ? '' : String(v)).trim(); }\n\n// Accept array from Set Locations\nconst locs = Array.isArray($json.locations) ? $json.locations : [];\n\nif (!Array.isArray(locs) || locs.length === 0) {\n  throw new Error('Split Location: expected array field \"locations\" from Set Locations.');\n}\n\n// Map of default resolverUrls if you don’t want to type them in Set Locations\nconst ORIGIN_BY_CITY = {\n  dallas:     'https://dallas.hibid.com',\n  houston:    'https://houston.hibid.com',\n  sacramento: 'https://rivercityfurnitureauction.hibid.com',\n  indiana:    'https://greatlakes.hibid.com',\n  indy:       'https://greatlakes.hibid.com'\n};\n\nconst out = locs.map(raw => {\n  const name   = s(raw.name);\n  const city   = s(raw.city || raw.name);\n  let resolver = s(raw.resolverUrl);\n  const listId = s(raw.listId);\n\n  if (!resolver) {\n    const key = city.toLowerCase();\n    resolver = ORIGIN_BY_CITY[key] || '';\n  }\n\n  return {\n    json: { name, city, resolverUrl: resolver, listId }\n  };\n});\n\nreturn out;\n"
+        "jsCode": "/**\n * Split Location (robust)\n * Input:  { locations: [ { name, city, resolverUrl, listId }, ... ] }\n * Output: one item per location with name, city, resolverUrl, listId\n */\nfunction s(v) { return (v == null ? '' : String(v)).trim(); }\n\n// Accept array from Set Locations\nconst locs = Array.isArray($json.locations) ? $json.locations : [];\n\nif (!Array.isArray(locs) || locs.length === 0) {\n  throw new Error('Split Location: expected array field \"locations\" from Set Locations.');\n}\n\n// Map of default resolver URLs if you don’t want to type them in Set Locations\nconst ORIGIN_BY_CITY = {\n  dallas:     'https://dallas.hibid.com',\n  houston:    'https://houston.hibid.com',\n  sacramento: 'https://rivercityfurnitureauction.hibid.com',\n  indiana:    'https://greatlakes.hibid.com',\n  indy:       'https://greatlakes.hibid.com'\n};\n\nreturn locs.map(raw => {\n  const name   = s(raw.name);\n  const city   = s(raw.city || raw.name);\n  const listId = s(raw.listId);\n\n  let resolver = s(raw.resolverUrl);\n  if (!resolver) {\n    resolver = ORIGIN_BY_CITY[city.toLowerCase()] || '';\n  }\n\n  return { json: { name, city, resolverUrl: resolver, listId } };\n});\n\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        272,
-        320
+        2832,
+        1280
       ],
-      "id": "97f5465c-4075-4d83-a05c-edad4ce69f41",
-      "name": "Split Location"
+      "id": "c6ec13d6-0aa9-4fb6-894a-efe77ebf9413",
+      "name": "Split Location1"
     },
     {
       "parameters": {
@@ -107,11 +131,11 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        496,
-        320
+        3056,
+        1280
       ],
-      "id": "9d5f743d-f82e-42d5-b623-bfe21e3c8822",
-      "name": "Fetch Resolver Page",
+      "id": "ac412ebd-bab5-40ea-bd49-c69313c4055a",
+      "name": "Fetch Resolver Page1",
       "notesInFlow": false,
       "alwaysOutputData": false
     },
@@ -140,46 +164,11 @@
       "type": "n8n-nodes-base.html",
       "typeVersion": 1.2,
       "position": [
-        704,
-        320
+        3280,
+        1280
       ],
-      "id": "b192bf2b-1b50-4916-8405-19c33a3f6924",
-      "name": "Extract Catalog Links"
-    },
-    {
-      "parameters": {
-        "assignments": {
-          "assignments": [
-            {
-              "id": "11b931a6-ed42-4668-bf36-483d0abd1c29",
-              "name": "city",
-              "value": "={{$node[\"Split Location\"].json[\"city\"]}}",
-              "type": "string"
-            },
-            {
-              "id": "7bc9a394-f130-43b0-a44c-6b33202aa8b3",
-              "name": "name",
-              "value": "={{$node[\"Split Location\"].json[\"name\"]}}",
-              "type": "string"
-            },
-            {
-              "id": "36db596c-5501-4679-a7ef-41a916ad58ee",
-              "name": "listId",
-              "value": "={{$node[\"Split Location\"].json[\"listId\"]}}",
-              "type": "string"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [
-        832,
-        320
-      ],
-      "id": "dd1de193-6d92-457c-9170-f6522bbf9ff0",
-      "name": "Pass Location Info"
+      "id": "6958a084-a2b0-4594-91fb-97684e046a1c",
+      "name": "Extract Catalog Links1"
     },
     {
       "parameters": {
@@ -200,11 +189,11 @@
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
       "position": [
-        -176,
-        416
+        2384,
+        1376
       ],
-      "id": "2f7e4399-d35e-40cb-8708-70c5e1bf7914",
-      "name": "Evening"
+      "id": "730cffca-281e-4950-af57-3760fa259e31",
+      "name": "Evening1"
     },
     {
       "parameters": {
@@ -213,11 +202,11 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1808,
-        320
+        4400,
+        1280
       ],
-      "id": "05fbe16f-3924-4cae-aa87-768fb8886059",
-      "name": "Build Item List"
+      "id": "7d63e883-296b-4169-93be-88532c3bf2c5",
+      "name": "Build Item List1"
     },
     {
       "parameters": {
@@ -252,11 +241,11 @@
       "type": "n8n-nodes-base.html",
       "typeVersion": 1.2,
       "position": [
-        1536,
-        320
+        4176,
+        1280
       ],
-      "id": "04a35806-f3c5-48d2-8a33-9ff73e2f8023",
-      "name": "Extract Lots",
+      "id": "83084e2f-3368-41fb-b562-74d1c6d1522c",
+      "name": "Extract Lots1",
       "alwaysOutputData": false
     },
     {
@@ -266,11 +255,11 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2592,
-        320
+        5200,
+        1280
       ],
-      "id": "262ac0fc-8d8c-4b51-be67-4777a56f4395",
-      "name": "Render Email HTML"
+      "id": "5ace35c9-e655-474a-b8ba-1b8403964592",
+      "name": "Render Email HTML1"
     },
     {
       "parameters": {
@@ -289,11 +278,11 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        2880,
-        320
+        5424,
+        1280
       ],
-      "id": "09b5ed3e-a530-4a1d-8b01-e3e00cb921a5",
-      "name": "CC — Create Email",
+      "id": "0bea2eaa-3feb-4eb1-b19f-5542f7f218a4",
+      "name": "CC — Create Email1",
       "credentials": {
         "oAuth2Api": {
           "id": "9Ul5c97KvhvrQElH",
@@ -336,11 +325,11 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        3104,
-        320
+        5648,
+        1280
       ],
-      "id": "19313eb6-3483-4f9e-a50e-04b29463df3c",
-      "name": "Pick Activity ID"
+      "id": "57e9c70e-b3ec-4fa4-bc79-664fad5af6e7",
+      "name": "Pick Activity ID1"
     },
     {
       "parameters": {
@@ -359,11 +348,11 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        3328,
-        320
+        5872,
+        1280
       ],
-      "id": "a3036c1e-26d8-40d9-8967-00af4df49ed3",
-      "name": "CC — Update Activity (Add List)",
+      "id": "61ee7a94-b2bc-4cc1-9992-06adc6f1d33f",
+      "name": "CC — Update Activity (Add List)1",
       "credentials": {
         "oAuth2Api": {
           "id": "9Ul5c97KvhvrQElH",
@@ -388,11 +377,11 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        3552,
-        320
+        6096,
+        1280
       ],
-      "id": "fbb54081-d3b7-4d05-84f9-d87e9f9c3a95",
-      "name": "CC — Schedule Send",
+      "id": "0d09789e-a9db-4df8-b3cf-26d93b977ed0",
+      "name": "CC — Schedule Send1",
       "credentials": {
         "oAuth2Api": {
           "id": "9Ul5c97KvhvrQElH",
@@ -421,11 +410,11 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        2016,
-        320
+        4624,
+        1280
       ],
-      "id": "59b1a288-2c72-4e0d-a960-17bf33adcad8",
-      "name": "Message a model",
+      "id": "c12a78b9-028a-444a-98a9-279f85dacc42",
+      "name": "Message a model1",
       "credentials": {
         "openAiApi": {
           "id": "7PxQv2DDaJCBSarn",
@@ -440,11 +429,11 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2368,
-        320
+        4976,
+        1280
       ],
-      "id": "30756ec4-c232-41fe-93f3-ec4e9d9ed94b",
-      "name": "Parse AI Subject & Intro"
+      "id": "8c48082b-2270-4cc0-8024-de9df9031976",
+      "name": "Parse AI Subject & Intro1"
     },
     {
       "parameters": {
@@ -453,11 +442,11 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        960,
-        320
+        3728,
+        1280
       ],
-      "id": "dd31d6f3-3ca8-4201-9ede-3a046c50e8f9",
-      "name": "Choose Current Catalog"
+      "id": "ef1e0821-722c-4bda-9822-10ec1d9ee94b",
+      "name": "Choose Current Catalog1"
     },
     {
       "parameters": {
@@ -474,71 +463,71 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1328,
-        320
+        3952,
+        1280
       ],
-      "id": "d9db9240-fdac-4ef8-b906-25e861256669",
-      "name": "Fetch Catalog"
+      "id": "6f76dbac-c41c-4ac2-bd13-4de6ac39c5fa",
+      "name": "Fetch Catalog1"
     }
   ],
   "pinData": {},
   "connections": {
-    "When clicking ‘Execute workflow’": {
+    "Pass Location Info": {
       "main": [
         [
           {
-            "node": "HTTP Request",
+            "node": "Choose Current Catalog1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Morning": {
+    "Morning1": {
       "main": [
         [
           {
-            "node": "Set Locations",
+            "node": "Set Locations1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Set Locations": {
+    "Set Locations1": {
       "main": [
         [
           {
-            "node": "Split Location",
+            "node": "Split Location1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Split Location": {
+    "Split Location1": {
       "main": [
         [
           {
-            "node": "Fetch Resolver Page",
+            "node": "Fetch Resolver Page1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Fetch Resolver Page": {
+    "Fetch Resolver Page1": {
       "main": [
         [
           {
-            "node": "Extract Catalog Links",
+            "node": "Extract Catalog Links1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Extract Catalog Links": {
+    "Extract Catalog Links1": {
       "main": [
         [
           {
@@ -549,132 +538,121 @@
         ]
       ]
     },
-    "Pass Location Info": {
+    "Evening1": {
       "main": [
         [
           {
-            "node": "Choose Current Catalog",
+            "node": "Set Locations1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Evening": {
+    "Build Item List1": {
       "main": [
         [
           {
-            "node": "Set Locations",
+            "node": "Message a model1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Extract Lots": {
+    "Extract Lots1": {
       "main": [
         [
           {
-            "node": "Build Item List",
+            "node": "Build Item List1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Build Item List": {
+    "Render Email HTML1": {
       "main": [
         [
           {
-            "node": "Message a model",
+            "node": "CC — Create Email1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Render Email HTML": {
+    "CC — Create Email1": {
       "main": [
         [
           {
-            "node": "CC — Create Email",
+            "node": "Pick Activity ID1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "CC — Create Email": {
+    "Pick Activity ID1": {
       "main": [
         [
           {
-            "node": "Pick Activity ID",
+            "node": "CC — Update Activity (Add List)1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Pick Activity ID": {
+    "CC — Update Activity (Add List)1": {
       "main": [
         [
           {
-            "node": "CC — Update Activity (Add List)",
+            "node": "CC — Schedule Send1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "CC — Update Activity (Add List)": {
+    "Message a model1": {
       "main": [
         [
           {
-            "node": "CC — Schedule Send",
+            "node": "Parse AI Subject & Intro1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Message a model": {
+    "Parse AI Subject & Intro1": {
       "main": [
         [
           {
-            "node": "Parse AI Subject & Intro",
+            "node": "Render Email HTML1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Parse AI Subject & Intro": {
+    "Choose Current Catalog1": {
       "main": [
         [
           {
-            "node": "Render Email HTML",
+            "node": "Fetch Catalog1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Choose Current Catalog": {
+    "Fetch Catalog1": {
       "main": [
         [
           {
-            "node": "Fetch Catalog",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Fetch Catalog": {
-      "main": [
-        [
-          {
-            "node": "Extract Lots",
+            "node": "Extract Lots1",
             "type": "main",
             "index": 0
           }
@@ -686,7 +664,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "de5508a8-2a31-418b-8650-b87eb4dabdf4",
+  "versionId": "a9dcedad-9790-4ba6-83bc-63dcac6af3b6",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "28deb88c8712c76659afb08e6c8c4d238b4b31b6137eabce7a182ee77c96db3f"

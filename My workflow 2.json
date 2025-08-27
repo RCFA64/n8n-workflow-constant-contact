@@ -453,7 +453,7 @@
     },
     {
       "parameters": {
-        "jsCode": "/**\n * Choose Current Catalog (runOnceForAllItems version)\n * Input: array of items, each with auctionLink, auctionTitle, city/name\n * Output: Array with catalogUrl attached per item\n */\n\nconst items = $input.all();\nconst ORIGIN_BY_CITY = {\n  dallas:     'https://dallas.hibid.com',\n  houston:    'https://houston.hibid.com',\n  sacramento: 'https://rivercityfurnitureauction.hibid.com/',\n  indiana:    'https://greatlakes.hibid.com',\n  indy:       'https://greatlakes.hibid.com'\n};\n\nreturn items\n  .map(item => {\n    const cityRaw = (item.json.city || item.json.name || '').trim();\n    const city = cityRaw.toLowerCase();\n    let links  = item.json.auctionLink  || [];\n    let titles = item.json.auctionTitle || [];\n\n    // Ensure links and titles are always arrays\n    if (!Array.isArray(links))  links = links ? [links] : [];\n    if (!Array.isArray(titles)) titles = titles ? [titles] : [];\n\n    // Pick link whose title contains the city, fallback to first\n    let chosen = null;\n    for (let i = 0; i < links.length; i++) {\n      const t = String(titles[i] || '').toLowerCase();\n      if (city && t.includes(city)) {\n        chosen = links[i];\n        break;\n      }\n    }\n    if (!chosen && links.length) chosen = links[0];\n    if (!chosen) return null;\n\n    let path = String(chosen).trim();\n    let catalogUrl;\n    if (/^https?:\\/\\//i.test(path)) {\n      catalogUrl = path;\n    } else {\n      const origin = ORIGIN_BY_CITY[city];\n      if (!origin) throw new Error(`No origin mapped for city \"${cityRaw}\"`);\n      catalogUrl = origin + (path.startsWith('/') ? path : '/' + path);\n    }\n\n    try {\n      catalogUrl = new URL(catalogUrl).href;\n    } catch {\n      return null;\n    }\n\n    return { ...item, json: { ...item.json, catalogUrl } };\n  })\n  .filter(item => item !== null);"
+        "jsCode": "/**\n * Choose Current Catalog (runOnceForAllItems version)\n * Input: array of items, each with auctionLink, auctionTitle, city/name\n * Output: Array with catalogUrl attached per item\n */\n\nconst items = $input.all();\nconst ORIGIN_BY_CITY = {\n  dallas:     'https://dallas.hibid.com',\n  houston:    'https://houston.hibid.com',\n  sacramento: 'https://rivercityfurnitureauction.hibid.com/',\n  indiana:    'https://greatlakes.hibid.com',\n  indy:       'https://greatlakes.hibid.com'\n};\n\nconst THROW_ON_ERROR = false;\n\nconst results = items.map(item => {\n  const cityRaw = (item.json.city || item.json.name || '').trim();\n  const city = cityRaw.toLowerCase();\n  let links  = item.json.auctionLink  || [];\n  let titles = item.json.auctionTitle || [];\n\n  // Ensure links and titles are always arrays\n  if (!Array.isArray(links))  links = links ? [links] : [];\n  if (!Array.isArray(titles)) titles = titles ? [titles] : [];\n\n  // Pick link whose title contains the city, fallback to first\n  let chosen = null;\n  for (let i = 0; i < links.length; i++) {\n    const t = String(titles[i] || '').toLowerCase();\n    if (city && t.includes(city)) {\n      chosen = links[i];\n      break;\n    }\n  }\n  if (!chosen && links.length) chosen = links[0];\n\n  if (!chosen) {\n    const msg = 'No auction link found';\n    if (THROW_ON_ERROR) throw new Error(msg);\n    return { ...item, json: { ...item.json, error: msg } };\n  }\n\n  let path = String(chosen).trim();\n  let catalogUrl;\n  if (/^https?:\\/\\//i.test(path)) {\n    catalogUrl = path;\n  } else {\n    const origin = ORIGIN_BY_CITY[city];\n    if (!origin) {\n      const msg = `No origin mapped for city \"${cityRaw}\"`;\n      if (THROW_ON_ERROR) throw new Error(msg);\n      return { ...item, json: { ...item.json, error: msg } };\n    }\n    catalogUrl = origin + (path.startsWith('/') ? path : '/' + path);\n  }\n\n  try {\n    catalogUrl = new URL(catalogUrl).href;\n  } catch {\n    const msg = `Invalid catalog URL \"${catalogUrl}\"`;\n    if (THROW_ON_ERROR) throw new Error(msg);\n    return { ...item, json: { ...item.json, error: msg } };\n  }\n\n  return { ...item, json: { ...item.json, catalogUrl } };\n});\n\nreturn Array.isArray(results) ? results : [];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -462,7 +462,8 @@
         432
       ],
       "id": "233eb63d-08fc-44d3-963e-3e5e6128a147",
-      "name": "Choose Current Catalog"
+      "name": "Choose Current Catalog",
+      "runOnceForAllItems": true
     },
     {
       "parameters": {
@@ -687,4 +688,5 @@
   },
   "id": "6YzFFkzTNCEUL39d",
   "tags": []
+  
 }

@@ -145,7 +145,7 @@
         "jsonHeaders": "={\n  \"Content-Type\": \"application/json\"\n}\n",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"name\": \"{{$json.name || 'Auction'}} | Daily Highlights {{ (new Date()).toISOString().slice(0,10) }}\",\n  \"email_campaign_activities\": [\n    {\n      \"format_type\": 5,\n      \"from_name\": \"River City Furniture Auction\",\n      \"from_email\": \"rivercityfurnitureauction@gmail.com\",\n      \"reply_to_email\": \"rivercityfurnitureauction@gmail.com\",\n      \"subject\": \"{{$json.subject || ''}}\",\n      \"preheader\": \"{{$json.preheader || ''}}\",\n      \"html_content\": \"{{$json.email_html || ''}}\"\n    }\n  ]\n}\n",
+        "jsonBody": "={{ {\n  \"fromName\": \"River City Furniture Auction\",\n  \"fromEmail\": \"info@example.com\",\n  \"subject\": $json.subject,\n  \"replyEmail\": \"info@example.com\",\n  \"contactListId\": \"YOUR_LIST_ID\",\n  \"html\": $json.email_html\n} }}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
@@ -678,7 +678,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "549cd91c-85eb-4bba-b700-81b97abf9b3b",
+  "versionId": "f883bcb1-4bd8-4542-a8f2-5bb8ffe5f1b6",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "28deb88c8712c76659afb08e6c8c4d238b4b31b6137eabce7a182ee77c96db3f"

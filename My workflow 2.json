@@ -3,47 +3,6 @@
   "nodes": [
     {
       "parameters": {
-        "assignments": {
-          "assignments": [
-            {
-              "id": "11b931a6-ed42-4668-bf36-483d0abd1c29",
-              "name": "city",
-              "value": "={{$node[\"Split Location\"].json[\"city\"]}}",
-              "type": "string"
-            },
-            {
-              "id": "7bc9a394-f130-43b0-a44c-6b33202aa8b3",
-              "name": "name",
-              "value": "={{$node[\"Split Location\"].json[\"name\"]}}",
-              "type": "string"
-            },
-            {
-              "id": "36db596c-5501-4679-a7ef-41a916ad58ee",
-              "name": "listId",
-              "value": "={{$node[\"Split Location\"].json[\"listId\"]}}",
-              "type": "string"
-            },
-            {
-              "id": "fe7f7133-3263-48ee-be1f-21549ad6c757",
-              "name": "catalog",
-              "value": "={{$node[\"Split Location\"].json[\"resolverUrl\"]}}",
-              "type": "string"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [
-        3520,
-        416
-      ],
-      "id": "9548e483-b4a7-4b15-a439-45dd265950f1",
-      "name": "Pass Location Info1"
-    },
-    {
-      "parameters": {
         "url": "https://api.constantcontact.com/v3/contact_lists?limit=1",
         "authentication": "genericCredentialType",
         "genericAuthType": "oAuth2Api",
@@ -52,10 +11,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        2400,
-        96
+        2432,
+        16
       ],
-      "id": "b4f6d68d-4cc6-4475-b811-8e53610c6a8c",
+      "id": "fd17bffa-b258-48e2-90a6-ed99f6b09cb0",
       "name": "HTTP Request",
       "credentials": {
         "oAuth2Api": {
@@ -78,113 +37,11 @@
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
       "position": [
-        2400,
-        320
+        2432,
+        464
       ],
-      "id": "49c42a5f-3d00-45cc-8399-a6fcdec87ec6",
+      "id": "3d00832e-4b78-4f3d-b35b-4eda65dedf6c",
       "name": "Morning"
-    },
-    {
-      "parameters": {
-        "assignments": {
-          "assignments": [
-            {
-              "id": "464d3923-6dd2-404f-8470-a59941fd9130",
-              "name": "locations",
-              "value": "[   {     \"name\": \"Dallas\",     \"city\": \"Dallas\",     \"resolverUrl\": \"https://dallas.hibid.com/company/17475/river-city-auction\",     \"listId\": \"LIST_ID_DALLAS\"   },   {     \"name\": \"Houston\",     \"city\": \"Houston\",     \"resolverUrl\": \"https://houston.hibid.com/company/17475/river-city-auction\",     \"listId\": \"LIST_ID_HOUSTON\"   },   {     \"name\": \"Sacramento\",     \"city\": \"Sacramento\",     \"resolverUrl\": \"https://rivercityfurnitureauction.hibid.com/\",     \"listId\": \"LIST_ID_SACRAMENTO\"   },   {     \"name\": \"Indiana\",     \"city\": \"Indiana\",     \"resolverUrl\": \"https://greatlakes.hibid.com/company/17475/river-city-auction\",     \"listId\": \"LIST_ID_INDIANA\"   } ]",
-              "type": "array"
-            }
-          ]
-        },
-        "options": {
-          "dotNotation": false
-        }
-      },
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [
-        2624,
-        416
-      ],
-      "id": "2e6a4854-6ccf-41eb-b9ab-e345c9ffb775",
-      "name": "Set Locations"
-    },
-    {
-      "parameters": {
-        "jsCode": "/**\n * Split Location (robust)\n * Input:  { locations: [ { name, city, resolverUrl, listId }, ... ] }\n * Output: one item per location with name, city, resolverUrl, listId\n */\nfunction s(v) { return (v == null ? '' : String(v)).trim(); }\n\n// Accept array from Set Locations\nconst locs = Array.isArray($json.locations) ? $json.locations : [];\n\nif (!Array.isArray(locs) || locs.length === 0) {\n  throw new Error('Split Location: expected array field \"locations\" from Set Locations.');\n}\n\n// Map of default resolver URLs if you don’t want to type them in Set Locations\nconst ORIGIN_BY_CITY = {\n  dallas: 'https://dallas.hibid.com',\n  houston: 'https://houston.hibid.com',\n  sacramento: 'https://rivercityfurnitureauction.hibid.com',\n  indiana: 'https://greatlakes.hibid.com',\n  indy: 'https://greatlakes.hibid.com'\n};\n\nreturn locs.map(raw => {\n  const name   = s(raw.name);\n  const city   = s(raw.city || raw.name);\n  const listId = s(raw.listId);\n\n  let resolver = s(raw.resolverUrl);\n  if (!resolver) {\n    resolver = ORIGIN_BY_CITY[city.toLowerCase()] || '';\n  }\n\n  return { json: { name, city, resolverUrl: resolver, listId } };\n});\n\n"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        2848,
-        416
-      ],
-      "id": "f2490f6c-503d-49d6-a88d-b13b5db01c61",
-      "name": "Split Location"
-    },
-    {
-      "parameters": {
-        "url": "={{$json.resolverUrl}}",
-        "options": {
-          "response": {
-            "response": {
-              "responseFormat": "text",
-              "outputPropertyName": "html"
-            }
-          }
-        }
-      },
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        3072,
-        416
-      ],
-      "id": "0cbb4721-d2f3-40b8-b880-d55090618faf",
-      "name": "Fetch Resolver Page",
-      "notesInFlow": false,
-      "alwaysOutputData": false
-    },
-    {
-      "parameters": {
-        "operation": "extractHtmlContent",
-        "dataPropertyName": "html",
-        "extractionValues": {
-          "values": [
-            {
-              "key": "auctionLink",
-              "cssSelector": "a[href*=\"/catalog/\"]",
-              "returnValue": "attribute",
-              "attribute": "href",
-              "returnArray": true
-            },
-            {
-              "key": "auctionTitle",
-              "cssSelector": "a[href*=\"/catalog/\"]",
-              "returnArray": true
-            },
-            {
-              "key": "auctionTitle",
-              "cssSelector": "a[href*=\"/catalog/\"], .auction a[href*=\"/catalog/\"], .auction-item a[href*=\"/catalog/\"]",
-              "returnArray": true
-            },
-            {
-              "key": "auctionLink",
-              "cssSelector": "a[href*=\"/catalog/\"], .auction a[href*=\"/catalog/\"], .auction-item a[href*=\"/catalog/\"]",
-              "returnArray": true
-            }
-          ]
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.html",
-      "typeVersion": 1.2,
-      "position": [
-        3296,
-        416
-      ],
-      "id": "f5a0f70d-c612-4932-b0c6-8f370ce27ce6",
-      "name": "Extract Catalog Links"
     },
     {
       "parameters": {
@@ -205,10 +62,10 @@
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
       "position": [
-        2400,
-        512
+        2432,
+        656
       ],
-      "id": "779dbf9f-46ea-4c84-a7ad-bed1e94fe1c0",
+      "id": "c3c0f1d8-2507-41e1-ae85-9f3eda6be1fc",
       "name": "Evening"
     },
     {
@@ -218,10 +75,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        4416,
-        416
+        4448,
+        560
       ],
-      "id": "c87216f0-3873-4365-9cda-5c7c47de48c3",
+      "id": "51db1dbe-0fac-44eb-ac69-9b9a2b1a5549",
       "name": "Build Item List"
     },
     {
@@ -257,10 +114,10 @@
       "type": "n8n-nodes-base.html",
       "typeVersion": 1.2,
       "position": [
-        4192,
-        416
+        2944,
+        -32
       ],
-      "id": "d14e8550-4a70-457a-bc9a-7a9479eff191",
+      "id": "d96fba8c-fec6-4b40-a688-ce8f555f2b0f",
       "name": "Extract Lots",
       "alwaysOutputData": false
     },
@@ -271,10 +128,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        5216,
-        416
+        5248,
+        560
       ],
-      "id": "bca666dc-a1c8-447f-96e1-826ac59b678b",
+      "id": "7ede42ff-baf8-4878-84a4-012b622ed63a",
       "name": "Render Email HTML"
     },
     {
@@ -285,19 +142,19 @@
         "genericAuthType": "oAuth2Api",
         "sendHeaders": true,
         "specifyHeaders": "json",
-        "jsonHeaders": "={\n  \"name\": \"{{$json.name}} | Daily Highlights {{ (new Date()).toISOString().slice(0,10) }}\",\n  \"email_campaign_activities\": [\n    {\n      \"format_type\": 5,\n      \"from_name\": \"River City Furniture Auction\",\n      \"from_email\": \"rivercityfurnitureauction@gmail.com\",\n      \"reply_to_email\": \"rivercityfurnitureauction@gmail.com\",\n      \"subject\": \"{{$json.subject}}\",\n      \"preheader\": \"{{$json.preheader}}\",\n      \"html_content\": \"{{$json.email_html}}\"\n    }\n  ]\n}\n",
+        "jsonHeaders": "={\n  \"Content-Type\": \"application/json\"\n}\n",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"name\": \"{{$json.name}} | Auction {{ (new Date()).toISOString().slice(0,10) }}\",\n  \"email_campaign_activities\": [\n    {\n      \"format_type\": 5,\n      \"from_name\": \"River City Furniture Auction\",\n      \"from_email\": \"rivercityfurnitureauction@gmail.com\",\n      \"reply_to_email\": \"rivercityfurnitureauction@gmail.com\",\n      \"subject\": \"{{$json.subject}}\",\n      \"preheader\": \"{{$json.preheader}}\",\n      \"html_content\": \"{{$json.email_html}}\"\n    }\n  ]\n}\n",
+        "jsonBody": "={\n  \"name\": \"{{$json.name || 'Auction'}} | Daily Highlights {{ (new Date()).toISOString().slice(0,10) }}\",\n  \"email_campaign_activities\": [\n    {\n      \"format_type\": 5,\n      \"from_name\": \"River City Furniture Auction\",\n      \"from_email\": \"rivercityfurnitureauction@gmail.com\",\n      \"reply_to_email\": \"rivercityfurnitureauction@gmail.com\",\n      \"subject\": \"{{$json.subject || ''}}\",\n      \"preheader\": \"{{$json.preheader || ''}}\",\n      \"html_content\": \"{{$json.email_html || ''}}\"\n    }\n  ]\n}\n",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        5440,
-        416
+        5472,
+        560
       ],
-      "id": "ca5243ec-fab6-4f35-94d5-a135f3ed4ee6",
+      "id": "a7cc2231-a790-4076-b53c-4121ff22489d",
       "name": "CC — Create Email",
       "credentials": {
         "oAuth2Api": {
@@ -341,10 +198,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        5664,
-        416
+        5696,
+        560
       ],
-      "id": "af2de749-5382-4c28-bdf0-c3b8b66d7fb5",
+      "id": "e3c8536a-905e-40cd-86ad-2bee5386f3c2",
       "name": "Pick Activity ID"
     },
     {
@@ -364,10 +221,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        5888,
-        416
+        5920,
+        560
       ],
-      "id": "1bc7114e-adde-4dea-82ae-46a15a68e6ad",
+      "id": "b09ba46e-3867-4f58-8d8b-8b8700051446",
       "name": "CC — Update Activity (Add List)",
       "credentials": {
         "oAuth2Api": {
@@ -393,10 +250,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        6112,
-        416
+        6144,
+        560
       ],
-      "id": "2daab37e-2754-4b4d-b9a6-864a20ec7951",
+      "id": "e6b0b886-a27b-4b13-88e2-316a40b80a9b",
       "name": "CC — Schedule Send",
       "credentials": {
         "oAuth2Api": {
@@ -417,7 +274,10 @@
           "values": [
             {
               "content": "You are a concise marketing copywriter for a daily online auction. \nWrite punchy subjects (max 8 words) and one-line intros (max 25 words).\nThe subject MUST include the city name provided. Avoid repeating wording day to day.\nNever include emojis or ALL CAPS. Return a strict JSON object only.\n",
-              "role": "=City: {{$json.name}}\nDate (ISO): {{(new Date()).toISOString().slice(0,10)}}\nTop items today: {{ ($json.items || []).slice(0,4).map(i => i.title).join(', ') }}\n\nWrite a JSON object with exactly these keys:\n{\n  \"subject\": \"string (≤ 8 words, must include the city name at the start)\",\n  \"intro\": \"string (≤ 25 words, natural tone, mention 1–2 of the items above)\"\n}\n"
+              "role": "system"
+            },
+            {
+              "content": "=City: {{$json.name}}\nDate (ISO): {{ (new Date()).toISOString().slice(0,10) }}\nTop items today: {{ ($json.items || []).slice(0,4).map(i => i.title).join(', ') }}\n\nReturn exactly:\n{\n  \"subject\": \"≤ 8 words, must start with the city\",\n  \"intro\": \"≤ 25 words, mention 1–2 of the items\"\n}"
             }
           ]
         },
@@ -426,10 +286,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        4640,
-        416
+        4672,
+        560
       ],
-      "id": "0109ebbf-bcc6-4cb0-b8b6-4c90753b2556",
+      "id": "0abaccf2-1b87-44db-adad-df7880281000",
       "name": "Message a model",
       "credentials": {
         "openAiApi": {
@@ -440,34 +300,64 @@
     },
     {
       "parameters": {
-        "jsCode": "// n8n OpenAI node typically returns content at $json.choices[0].message.content\n// but we’ll guard for other shapes too.\nlet raw = $json;\nlet content =\n  raw?.choices?.[0]?.message?.content ??\n  raw?.data?.choices?.[0]?.message?.content ??\n  (typeof raw === 'string' ? raw : '');\n\nlet subject = '';\nlet intro = '';\n\ntry {\n  const obj = JSON.parse(content);\n  subject = (obj.subject || '').trim();\n  intro   = (obj.intro || '').trim();\n} catch (e) {\n  // Fallback: try to extract \"subject:\" and \"intro:\" lines if JSON wasn’t clean\n  const s = /\"subject\"\\s*:\\s*\"([^\"]+)\"/i.exec(content);\n  const i = /\"intro\"\\s*:\\s*\"([^\"]+)\"/i.exec(content);\n  subject = s ? s[1] : '';\n  intro   = i ? i[1] : '';\n}\n\n// Enforce city at start, uniqueness, and length limits\nconst city = $json.name || '';\nfunction startsWithCity(str, cityName) {\n  return str.toLowerCase().startsWith(cityName.toLowerCase());\n}\nfunction trimWords(str, maxWords) {\n  const parts = (str || '').split(/\\s+/).filter(Boolean);\n  return parts.slice(0, maxWords).join(' ');\n}\nif (!startsWithCity(subject, city)) {\n  subject = `${city} ${subject}`;\n}\nsubject = trimWords(subject, 8);\n\n// Guarantee subjects differ across locations by including city code\n// (since city is at the start, each location's subject is inherently different).\n// But also ensure no empties:\nif (!subject) subject = `${city} Auction Highlights`;\nif (!intro)   intro   = `Fresh picks in ${city} today.`;\n\nreturn [{\n  ...$json,\n  subject,\n  intro\n}];\n"
+        "jsCode": "// Mode: Run Once For All Items (OK)\n// Input shape (from OpenAI node): { index, message: { role, content } }\n\nconst raw = $json;\n\n// Grab the content robustly across shapes\nconst content =\n  raw?.message?.content ??\n  raw?.choices?.[0]?.message?.content ??\n  raw?.data?.choices?.[0]?.message?.content ??\n  (typeof raw === 'string' ? raw : '');\n\nlet subject = '';\nlet intro = '';\n\n// Try JSON first, then fallback to regex\ntry {\n  const obj = JSON.parse(content);\n  subject = (obj.subject || '').trim();\n  intro   = (obj.intro   || '').trim();\n} catch {\n  const s = /\"subject\"\\s*:\\s*\"([^\"]+)\"/i.exec(content);\n  const i = /\"intro\"\\s*:\\s*\"([^\"]+)\"/i.exec(content);\n  subject = s ? s[1].trim() : '';\n  intro   = i ? i[1].trim() : '';\n}\n\n// Enforce city at start and 8-word cap\nconst city = ($json.name || '').trim();\nfunction startsWithCity(str, cityName) {\n  return str.toLowerCase().startsWith((cityName || '').toLowerCase());\n}\nfunction trimWords(str, max) {\n  return (str || '').split(/\\s+/).filter(Boolean).slice(0, max).join(' ');\n}\nif (!startsWithCity(subject, city)) subject = `${city} ${subject}`.trim();\nsubject = trimWords(subject, 8);\nif (!intro) intro = `Fresh picks in ${city} today.`;\n\n// IMPORTANT: strip reserved keys (like index) and wrap in { json: ... }\nconst { index, ...rest } = $json;\n\nreturn [{\n  json: {\n    ...rest,\n    subject,\n    intro\n  }\n}];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        4992,
-        416
+        5024,
+        560
       ],
-      "id": "6f1779d1-95a5-4ad4-943e-d345e44425e7",
+      "id": "fb65c485-012b-4cfa-816d-7f42f8ae65ef",
       "name": "Parse AI Subject & Intro"
     },
     {
       "parameters": {
-        "jsCode": "/**\n * Choose Current Catalog (runOnceForAllItems version)\n * Input: array of items, each with auctionLink, auctionTitle, city/name\n * Output: Array with catalogUrl attached per item\n */\n\nconst items = $input.all();\nconst ORIGIN_BY_CITY = {\n  dallas:     'https://dallas.hibid.com',\n  houston:    'https://houston.hibid.com',\n  sacramento: 'https://rivercityfurnitureauction.hibid.com/',\n  indiana:    'https://greatlakes.hibid.com',\n  indy:       'https://greatlakes.hibid.com'\n};\n\nconst THROW_ON_ERROR = false;\n\nconst results = items.map(item => {\n  const cityRaw = (item.json.city || item.json.name || '').trim();\n  const city = cityRaw.toLowerCase();\n  let links  = item.json.auctionLink  || [];\n  let titles = item.json.auctionTitle || [];\n\n  // Ensure links and titles are always arrays\n  if (!Array.isArray(links))  links = links ? [links] : [];\n  if (!Array.isArray(titles)) titles = titles ? [titles] : [];\n\n  // Pick link whose title contains the city, fallback to first\n  let chosen = null;\n  for (let i = 0; i < links.length; i++) {\n    const t = String(titles[i] || '').toLowerCase();\n    if (city && t.includes(city)) {\n      chosen = links[i];\n      break;\n    }\n  }\n  if (!chosen && links.length) chosen = links[0];\n\n  if (!chosen) {\n    const msg = 'No auction link found';\n    if (THROW_ON_ERROR) throw new Error(msg);\n    return { ...item, json: { ...item.json, error: msg } };\n  }\n\n  let path = String(chosen).trim();\n  let catalogUrl;\n  if (/^https?:\\/\\//i.test(path)) {\n    catalogUrl = path;\n  } else {\n    const origin = ORIGIN_BY_CITY[city];\n    if (!origin) {\n      const msg = `No origin mapped for city \"${cityRaw}\"`;\n      if (THROW_ON_ERROR) throw new Error(msg);\n      return { ...item, json: { ...item.json, error: msg } };\n    }\n    catalogUrl = origin + (path.startsWith('/') ? path : '/' + path);\n  }\n\n  try {\n    catalogUrl = new URL(catalogUrl).href;\n  } catch {\n    const msg = `Invalid catalog URL \"${catalogUrl}\"`;\n    if (THROW_ON_ERROR) throw new Error(msg);\n    return { ...item, json: { ...item.json, error: msg } };\n  }\n\n  return { ...item, json: { ...item.json, catalogUrl } };\n});\n\nreturn Array.isArray(results) ? results : [];\n"
+        "url": "={{$json.catalogUrl}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "Accept",
+              "value": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+            },
+            {
+              "name": "Accept-Language",
+              "value": "en-US,en;q=0.9"
+            },
+            {
+              "name": "Referer",
+              "value": "https://rivercityfurnitureauction.com/"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true,
+              "responseFormat": "text",
+              "outputPropertyName": "html"
+            }
+          }
+        }
       },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
       "position": [
-        3744,
-        432
+        3312,
+        -32
       ],
-      "id": "233eb63d-08fc-44d3-963e-3e5e6128a147",
-      "name": "Choose Current Catalog",
-      "runOnceForAllItems": true
+      "id": "6c483eb2-3de0-4b28-ac9b-a910343a0877",
+      "name": "Fetch Catalog"
     },
     {
       "parameters": {
-        "url": "={{$json.catalogUrl}}",
+        "url": "https://rivercityfurnitureauction.com/",
         "options": {
           "response": {
             "response": {
@@ -480,75 +370,134 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        3968,
-        416
+        2656,
+        560
       ],
-      "id": "043f5747-2be3-44a5-a91e-17064f8db84d",
-      "name": "Fetch Catalog"
+      "id": "11ca27af-4046-41d3-8ef8-c5dc5bfbd39d",
+      "name": "Fetch Homepage"
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "dataPropertyName": "html",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "auctionLink",
+              "cssSelector": "a.elementor-button",
+              "returnValue": "attribute",
+              "attribute": "href",
+              "returnArray": true
+            },
+            {
+              "key": "auctionText",
+              "cssSelector": "a.elementor-button .elementor-button-text",
+              "returnArray": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        2880,
+        560
+      ],
+      "id": "27ecf87a-13ed-414e-b050-8f1809b837c4",
+      "name": "Extract Homepage Auction Links"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Expect: auctionLink[] and auctionText[] from the HTML Extract node\nconst links = $json.auctionLink || [];\nconst texts = $json.auctionText || [];\n\nconst LIST_BY_CITY = {\n  dallas:      'LIST_ID_DALLAS',\n  houston:     'LIST_ID_HOUSTON',\n  sacramento:  'LIST_ID_SACRAMENTO',\n  indiana:     'LIST_ID_INDIANA',\n  indianapolis:'LIST_ID_INDIANA', // treat Indianapolis as Indiana list\n};\n\nconst out = [];\n\nfor (let i = 0; i < Math.min(links.length, texts.length); i++) {\n  const href = String(links[i] || '').trim();\n  const text = String(texts[i] || '').trim();\n\n  // Pull the city name from the button text\n  // e.g., \"Browse Dallas Auction\" → \"Dallas\"\n  const m = text.match(/\\b(Sacramento|Dallas|Houston|Indianapolis|Indiana)\\b/i);\n  let city = m ? m[1] : text;\n  if (/^indianapolis$/i.test(city)) city = 'Indiana';\n\n  // Map to Constant Contact list\n  const listId = LIST_BY_CITY[city.toLowerCase()] || '';\n\n  // Output shape that downstream expects\n  out.push({\n    json: {\n      name: city,          // used as the city name in emails\n      city,                // for consistency\n      listId,              // audience list per city\n      catalogUrl: href     // <-- directly the HiBid catalog link\n    }\n  });\n}\n\nreturn out;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3104,
+        560
+      ],
+      "id": "0c80d34a-31c3-4dca-9a5a-ebc6e4d44f03",
+      "name": "Build Catalogs from Homepage"
+    },
+    {
+      "parameters": {
+        "jsCode": "/**\n * Parse HiBid lots from the HTML by extracting the embedded\n * window.__INITIAL_STATE__ JSON and walking it for lot-like entries.\n * Output arrays: itemLink[], imgSrc[], itemTitle[], price[]\n * so your downstream \"Build Item List\" node keeps working unchanged.\n */\n\nfunction safeParseJSON(s) {\n  try { return JSON.parse(s); } catch { return null; }\n}\n\nconst html = $json.html || '';\nconst out = { itemLink: [], imgSrc: [], itemTitle: [], price: [] };\n\n// 1) Grab the embedded state blob\n// Typical pattern: window.__INITIAL_STATE__ = {...};\nconst m = html.match(/window\\.__INITIAL_STATE__\\s*=\\s*(\\{[\\s\\S]*?\\});/);\nif (!m) {\n  // Return empty arrays but keep flowing\n  return [{ ...$json, ...out, note: 'No __INITIAL_STATE__ found' }];\n}\n\nlet state = safeParseJSON(m[1]);\n// Some sites put \"undefined\" or trailing commas; try a cleanup pass if null\nif (!state) {\n  const cleaned = m[1]\n    .replace(/\\bundefined\\b/g, 'null')\n    .replace(/,\\s*}/g, '}')\n    .replace(/,\\s*]/g, ']');\n  state = safeParseJSON(cleaned);\n}\nif (!state || typeof state !== 'object') {\n  return [{ ...$json, ...out, note: 'STATE not parseable' }];\n}\n\n// 2) Walk the object to find arrays that look like lots\nconst candidates = [];\n\nfunction walk(obj) {\n  if (!obj) return;\n  if (Array.isArray(obj)) {\n    if (obj.length && typeof obj[0] === 'object') {\n      // Heuristic: lot-like objects tend to have a title/name AND an image or url\n      const hasTitleish = ['title','name','lotTitle','itemTitle'].some(k => k in obj[0]);\n      const hasMediaish = ['image','img','imageUrl','photo','thumbnail','lotImage'].some(k => k in obj[0]);\n      const hasUrlish   = ['url','href','lotUrl','link'].some(k => k in obj[0]);\n      if (hasTitleish && (hasMediaish || hasUrlish)) candidates.push(obj);\n    }\n    obj.forEach(walk);\n    return;\n  }\n  if (typeof obj === 'object') {\n    Object.values(obj).forEach(walk);\n  }\n}\nwalk(state);\n\n// Pick the largest plausible array (usually the lots)\nlet lots = [];\nfor (const arr of candidates) {\n  if (arr.length > lots.length) lots = arr;\n}\n\n// 3) Normalize fields\nconst toAbs = (u) => {\n  if (!u) return '';\n  if (/^https?:\\/\\//i.test(u)) return u;\n  try {\n    // base on the catalog page origin\n    const base = new URL($json.catalogUrl || 'https://hibid.com/');\n    return new URL(u, base.origin).href;\n  } catch { return u; }\n};\n\nfor (const it of lots) {\n  // Try several common field names; fall back gracefully\n  const title = String(\n    it.title ?? it.name ?? it.lotTitle ?? it.itemTitle ?? ''\n  ).trim();\n\n  const href  = toAbs(\n    it.href ?? it.url ?? it.lotUrl ?? it.link ?? ''\n  );\n\n  const img   = toAbs(\n    it.imageUrl ?? it.image ?? it.img ?? it.photo ?? it.thumbnail ?? ''\n  );\n\n  const price = String(\n    it.currentBidDisplay ?? it.priceDisplay ?? it.currentBid ?? it.price ?? ''\n  ).trim();\n\n  if (title && href && img) {\n    out.itemTitle.push(title);\n    out.itemLink.push(href);\n    out.imgSrc.push(img);\n    out.price.push(price);\n  }\n}\n\nreturn [{ ...$json, ...out }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3616,
+        -48
+      ],
+      "id": "4bc7a056-de7e-4f41-9124-fe6fc3541fa1",
+      "name": "Parse HiBid Lots"
+    },
+    {
+      "parameters": {
+        "jsCode": "const url = String($json.catalogUrl || '').trim();\nconst m = url.match(/\\/catalog\\/(\\d+)/);\nif (!m) return [{ ...$json, error: 'No catalogId in URL' }];\n\nreturn [{ ...$json, catalogId: m[1] }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3776,
+        560
+      ],
+      "id": "7090db40-5358-445a-a922-e8c1a13fde63",
+      "name": "Extract catalogId from catalogUrl"
+    },
+    {
+      "parameters": {
+        "url": "=https://hibid.com/lotlisting/catalog/{{$json.catalogId}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json,text/plain,*/*"
+            },
+            {
+              "name": "Referer",
+              "value": "lotsJson"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        4000,
+        560
+      ],
+      "id": "c14f39e0-8fa2-4b44-a794-252ca6071f89",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $json.lotsJson || {};\nlet rows = [];\n\n// Try common shapes; adjust if your response differs\nif (Array.isArray(data)) rows = data;\nif (Array.isArray(data?.items)) rows = data.items;\nif (Array.isArray(data?.results)) rows = data.results;\n\n// Normalize to what Build Item List expects\nconst items = rows.map(r => {\n  const title = String(r.title ?? r.name ?? r.lotTitle ?? '').trim();\n  const href  = String(r.url ?? r.lotUrl ?? r.href ?? '').trim();\n  const img   = String(r.imageUrl ?? r.image ?? r.photo ?? '').trim();\n  const price = String(r.currentBidDisplay ?? r.priceDisplay ?? r.currentBid ?? r.price ?? '').trim();\n  return { title, href, imageUrl: img, price };\n}).filter(x => x.title && x.href && x.imageUrl);\n\nreturn [{ ...$json, items }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4224,
+        560
+      ],
+      "id": "60b1f1cf-5d2e-4ce0-866c-28a75085ef1f",
+      "name": "Map JSON → items"
     }
   ],
   "pinData": {},
   "connections": {
-    "Pass Location Info1": {
-      "main": [
-        [
-          {
-            "node": "Choose Current Catalog",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Morning": {
       "main": [
         [
           {
-            "node": "Set Locations",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Set Locations": {
-      "main": [
-        [
-          {
-            "node": "Split Location",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Split Location": {
-      "main": [
-        [
-          {
-            "node": "Fetch Resolver Page",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Fetch Resolver Page": {
-      "main": [
-        [
-          {
-            "node": "Extract Catalog Links",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Extract Catalog Links": {
-      "main": [
-        [
-          {
-            "node": "Pass Location Info1",
+            "node": "Fetch Homepage",
             "type": "main",
             "index": 0
           }
@@ -559,7 +508,7 @@
       "main": [
         [
           {
-            "node": "Set Locations",
+            "node": "Fetch Homepage",
             "type": "main",
             "index": 0
           }
@@ -579,13 +528,7 @@
     },
     "Extract Lots": {
       "main": [
-        [
-          {
-            "node": "Build Item List",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "Render Email HTML": {
@@ -654,22 +597,76 @@
         ]
       ]
     },
-    "Choose Current Catalog": {
+    "Fetch Catalog": {
+      "main": [
+        []
+      ]
+    },
+    "Fetch Homepage": {
       "main": [
         [
           {
-            "node": "Fetch Catalog",
+            "node": "Extract Homepage Auction Links",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Fetch Catalog": {
+    "Extract Homepage Auction Links": {
       "main": [
         [
           {
-            "node": "Extract Lots",
+            "node": "Build Catalogs from Homepage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Catalogs from Homepage": {
+      "main": [
+        [
+          {
+            "node": "Extract catalogId from catalogUrl",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse HiBid Lots": {
+      "main": [
+        []
+      ]
+    },
+    "Extract catalogId from catalogUrl": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Map JSON → items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Map JSON → items": {
+      "main": [
+        [
+          {
+            "node": "Build Item List",
             "type": "main",
             "index": 0
           }
@@ -681,12 +678,11 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "f773a44c-883e-4277-b575-e495c882a876",
+  "versionId": "549cd91c-85eb-4bba-b700-81b97abf9b3b",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "28deb88c8712c76659afb08e6c8c4d238b4b31b6137eabce7a182ee77c96db3f"
   },
   "id": "6YzFFkzTNCEUL39d",
   "tags": []
-  
 }
